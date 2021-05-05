@@ -27,6 +27,8 @@ tfidf  =  TfidfVectorizer(sublinear_tf=True,  min_df=5,  norm='l2',  ngram_range
 import  joblib
 
 
+"""
+
 df  =  pd.read_csv('./proj/data.csv')
 df  =  df[pd.notnull(df['content'])]
 df['category_id']  =  df['category'].factorize()[0]
@@ -38,7 +40,7 @@ id_to_category  =  dict(category_id_df[['category_id',  'category']].values)
 features  =  tfidf.fit_transform(df.content).toarray()
 labels  =  df.category_id
 from  sklearn.model_selection  import  train_test_split
-
+"""
 
 def  predict(request):
   #  LSV_swahili_model  =  open('LSV_Swahili_model.pkl','rb')
@@ -48,12 +50,13 @@ def  predict(request):
 
   nb_swahili_model  =  open('./proj/nb1_Swahili_model.pkl','rb')
   model  =  joblib.load(nb_swahili_model)
+  vectorizer = pickle.load(open("vector.pickel", "rb"))
 
   if  request.method  ==  'POST':
     message  =  request.POST.get('swa-input')
     data  =  [message]
 
-    vect  =  tfidf.transform(data).toarray()
+    vect  =  vectorizer.transform(data).toarray()
     
     my_prediction  =  model.predict(vect).tolist()[0]
 
