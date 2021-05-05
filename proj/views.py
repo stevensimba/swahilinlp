@@ -1,4 +1,22 @@
-from    flask  import  Flask,render_template,url_for,request
+from django.http.response import JsonResponse
+from django.shortcuts import render
+from django.http import HttpResponse
+
+
+def home(request):
+    pred = 0
+    if request.method == "POST":
+       swa_input =  request.POST.get("swa-input")
+
+       if swa_input == "steve":
+           pred = 0
+       else:
+            pred = 1
+       # make a prediction and send the output in Json format
+       return JsonResponse({"prediction": pred}, status=200)
+    return render(request, "home.html")
+
+
 import  pandas  as  pd  
 import  pickle
 from  sklearn.feature_extraction.text  import  CountVectorizer
@@ -9,7 +27,7 @@ tfidf  =  TfidfVectorizer(sublinear_tf=True,  min_df=5,  norm='l2',  ngram_range
 import  joblib
 
 
-df  =  pd.read_csv('data.csv')
+df  =  pd.read_csv('./proj/data.csv')
 df  =  df[pd.notnull(df['content'])]
 df['category_id']  =  df['category'].factorize()[0]
 from  io  import  StringIO
@@ -21,38 +39,24 @@ features  =  tfidf.fit_transform(df.content).toarray()
 labels  =  df.category_id
 from  sklearn.model_selection  import  train_test_split
 
-app  =  Flask(__name__)
 
-
-from  flask  import  jsonify
-
-@app.route('/home',  methods=["POST",  "GET"])
-def  home():
-  return  render_template('home.html')
-
-
-
-@app.route('/predict', methods=['POST', "GET"])
-def  predict():
+def  predict(request):
   #  LSV_swahili_model  =  open('LSV_Swahili_model.pkl','rb')
   pred  =  0
   text  =  ""
   habari = ["Maswala ya Kiuchumi", "Habari za Kitaifa", "Jarida la Michezo", "Dira za Kimataifa", "Raha na Burudani", "Mambo ya Afya"]
 
-  nb_swahili_model  =  open('nb1_Swahili_model.pkl','rb')
+  nb_swahili_model  =  open('./proj/nb1_Swahili_model.pkl','rb')
   model  =  joblib.load(nb_swahili_model)
 
   if  request.method  ==  'POST':
-    message  =  request.form['swa-input']
+    message  =  request.POST.get('swa-input')
     data  =  [message]
 
     vect  =  tfidf.transform(data).toarray()
     
     my_prediction  =  model.predict(vect).tolist()[0]
 
-    return  jsonify({"prediction":  my_prediction,  "message":  habari[my_prediction]})
+    return  JsonResponse({"prediction":  my_prediction,  "message":  habari[my_prediction]})
     #  my_prediction=  id_to_category[my_prediction[0]]
-  return  render_template('home.html')
-
-if  __name__  ==  '__main__':
-  app.run(debug=True)
+  return  render(request, 'index.html')

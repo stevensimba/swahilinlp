@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>News Classification</title>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	<!-- Index CSS -->
+	<link rel="stylesheet" href="index.css">
+
+	<!-- MDI -->
+	<link rel="stylesheet" href="cdn.materialdesignicons.com/3.8.95/css/materialdesignicons.min.css">
+
+	<!-- Optional JavaScript -->
+	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+	<style>
+		.nav-item:hover {
+			background-color: rgba(224, 220, 220, 0.459);
+		}
+
+		main {
+			position: absolute;
+			margin: 0 auto !important;
+			width: 100% !important;
+			height: 100% !important;
+			background: dodgerblue linear-gradient(45deg, aqua, dodgerblue, deeppink) fixed;
+			color: white;
+			font: normal 32px/1.6 system-ui, sans-serif;
+			font-size: 20px;
+			text-shadow: 0 1px 1px hsl(0 0% 0% / 20%);
+		}
+
+		.sample {
+			font-size: 15px;
+		}
+
+		form {
+			display: inline-block;
+			color: blue;
+			box-sizing: border-box;
+			padding: 5px 3px;
+			background-color: white;
+			border-radius: 10px;
+		}
+
+		.text-box {
+			margin: 20px;
+		}
+
+		textarea {
+			font-size: 18px;
+		}
+
+		table {
+			background-color: white;
+			;
+		}
+	</style>
+</head>
+
+<body>
+	<header>
+		<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+			<a class="navbar-brand" href="#" style="font-family: Nathanos; font-size: 30px; font-weight:700">News
+				Classifier</a>
+
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-ml">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="navbar-collapse collapse" id="navbar-ml">
+				<ul class="navbar-nav nav-fill w-25">
+					<li class="nav-item active">
+						<a class="nav-link font-weight-bold" href="#">Home</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link font-weight-bold" href="#">About</a>
+					</li>
+				</ul>
+			</div>
+
+		</nav>
+	</header>
+	<main>
+		<div class="container">
+			<div class="row text-box">
+				<!--  two unequal cols, turn col to row for screens under 992px-->
+				<div class="col-lg-5 inputs">
+					<div style="text-align:center; font-weight:bold; ">Please enter swahili text</div>
+					<form style="width:100%; padding:5px 5px;" method="POST">
+					{% csrf_token %}
+						<textarea style="width:100%; text-align:left; " rows=4 name="swa-input" id="swa-input">
+                            </textarea>
+						<button class="btn btn-outline-primary " style="float: right;"
+							type="submit " id="submit-input"> submit </button>
+					</form>
+				</div>
+				<div class="col-lg-5 sample ">
+					<div style="text-align:center; font-weight:bold; font-size:18px;"> Sample Text </div>
+					<table class=" table table-responsive table-hover  " >
+						<thead>
+							<tr style="text-align:center" class="bg-info">
+								<th class="table-in ">input</th>
+								<th class="table-out "> answer</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td> mwanasoka huyo alipata majeraha</td>
+								<td> Michezo </td>
+							</tr>
+							<tr>
+								<td> Marekani ni nchi iliyotajika</td>
+								<td> Kimataifa </td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="container" id="image-card">
+			<div class="row " style="display:flex" id="showresults">
+				<div class="col-6" style="margin:auto; justify-content: center;">
+					<div class="card ">					
+						<img class="card-img-top " src="./static/images/0.jpg" style="height:225px "> 
+						<div class="card-body bg-info ">
+							<h5 class="card-title" style="text-align:center; margin:1px; font-weight: bold"> Have fun with nlp
+							</h5>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+</script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+	integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+</script>
+
+</body>
+
+</html>
+
+<script>
+
+	$(function () {
+
+		$('#submit-input').click(function (e) {
+			e.preventDefault();
+			
+			$.ajax({
+				url: "/predict",
+				data: $('form').serialize(),
+				type: "POST",
+				success: function (response) {
+					const muvie = document.getElementById("image-card")
+						$("#showresults").remove();
+					let src = "./static/images/" + response.prediction + ".jpg"
+					result = `
+					 <div class="row " style="display:flex" id="showresults">
+					 	<div class="col-6" style="margin:auto; justify-content: center;">
+					 		<div class="card ">
+					 			<img class="card-img-top " src=${src} style="height:225px ">
+					 			<div class="card-body bg-info ">
+					 				<h5 class="card-title" style="text-align:center; margin:1px; font-weight: bold"> ${response.message} </h5>
+					 			</div>
+					 		</div>
+					 	</div>
+					 </div>
+					`
+					muvie.insertAdjacentHTML("beforeend", result)
+				},
+				error: function (error) {
+					console.log("error", error);
+				}
+			});
+			return false;
+		})
+
+	})
+</script>
